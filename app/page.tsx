@@ -1,7 +1,9 @@
+"use client"
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Shield, GraduationCap, Building2, ArrowRight, CheckCircle } from 'lucide-react';
+import { Shield, GraduationCap, Building2, ArrowRight, CheckCircle, Sun, Moon } from 'lucide-react';
+import { useTheme } from "next-themes";
 
 const features = [
   {
@@ -22,8 +24,26 @@ const features = [
 ];
 
 export default function Home() {
+  const { theme, setTheme } = useTheme();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-background">
+      {/* Theme Toggle */}
+      <div className="fixed top-4 right-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="rounded-full"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] [mask-image:radial-gradient(white,transparent_70%)]" />
