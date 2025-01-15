@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { GradientButton } from "@/components/gradient-button";
 
@@ -85,7 +84,6 @@ export default function Home() {
           )}
         </Button>
       </motion.div>
-
       {/* Hero Section */}
       <AuroraBackground>
         <div className="container mx-auto px-4 pt-24 pb-16">
@@ -99,7 +97,7 @@ export default function Home() {
               ease: "easeInOut",
             }}
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600 ">
               Secure Digital Certificates
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
@@ -117,7 +115,6 @@ export default function Home() {
           </motion.div>
         </div>
       </AuroraBackground>
-
       {/* Features Section */}
       <motion.div
         className="container mx-auto px-4 py-16"
@@ -143,7 +140,6 @@ export default function Home() {
           ))}
         </div>
       </motion.div>
-
       {/* Portal Cards */}
       <motion.div
         className="container mx-auto px-4 py-16"
@@ -173,29 +169,39 @@ export default function Home() {
               href: "/organization/login",
             },
           ].map((portal, index) => (
-            
-              <Card className="p-6 backdrop-blur-lg bg-card/50 border-border/50 hover:border-primary/50 transition-all duration-300">
-                <div className="text-center">
-                  <motion.div
-                    className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 400 }}
-                  >
-                    {portal.icon}
-                  </motion.div>
-                  <h2 className="text-xl font-semibold mb-2">{portal.title}</h2>
-                  <p className="text-muted-foreground mb-6">
-                    {portal.description}
-                  </p>
-                  <GradientButton href={portal.href} className="w-full group">
-                    Login
-                  </GradientButton>
-                </div>
-              </Card>
-            
+            <Card className="p-6 backdrop-blur-lg bg-card/50 border-border/50 hover:border-primary/50 transition-all duration-300">
+              <div className="text-center">
+                <motion.div
+                  className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  {portal.icon}
+                </motion.div>
+                <h2 className="text-xl font-semibold mb-2">{portal.title}</h2>
+                <p className="text-muted-foreground mb-6">
+                  {portal.description}
+                </p>
+                <GradientButton href={portal.href} className="w-full group">
+                  Login
+                </GradientButton>
+              </div>
+            </Card>
           ))}
         </div>
       </motion.div>
+      <div className="text-center text-md text-muted-foreground py-4">
+        Crafted with
+        <span className=" animate-pulse">❤️</span>
+        by{" "}
+        <Link
+          href="https://byteprolabs.com"
+          target="_blank"
+          className="font-medium underline-offset-4 hover:text-primary hover:underline transition-colors"
+        >
+          ByteProLabs
+        </Link>
+      </div>
     </div>
   );
 }

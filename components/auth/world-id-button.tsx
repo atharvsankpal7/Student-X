@@ -6,11 +6,9 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-interface WorldIDButtonProps {
-  role: "issuer" | "candidate" | "organization";
-}
 
-export function WorldIDButton({ role }: WorldIDButtonProps) {
+
+export function WorldIDButton() {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -18,7 +16,6 @@ export function WorldIDButton({ role }: WorldIDButtonProps) {
     try {
       const result = await signIn("worldcoin", {
         worldId: proof.nullifier_hash,
-        role: role,
         redirect: false,
       });
 
@@ -31,14 +28,12 @@ export function WorldIDButton({ role }: WorldIDButtonProps) {
         return;
       }
 
-      // Show success toast
       toast({
         title: "Authentication successful",
         description: "Redirecting to dashboard...",
       });
 
-      // Redirect to the appropriate dashboard
-      router.push(`/${role}/dashboard`);
+      router.push(`/user/dashboard`);
       router.refresh();
     } catch (error) {
       console.error("Authentication error:", error);
@@ -56,8 +51,6 @@ export function WorldIDButton({ role }: WorldIDButtonProps) {
       action="login"
       onSuccess={handleVerify}
       handleVerify={handleVerify}
-      // credential_types={["orb", "phone"]}
-      
     >
       {({ open }) => (
         <Button
