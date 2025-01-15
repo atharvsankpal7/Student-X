@@ -98,11 +98,10 @@ export default function Home() {
             }}
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-6 pb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600 ">
-              Secure Digital Certificates
+              Secured by World ID
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Issue, manage, and verify academic credentials with blockchain
-              technology
+              ensuring only real individuals can access and manage certificates
             </p>
             <motion.div
               className="flex flex-wrap gap-4 justify-center"
