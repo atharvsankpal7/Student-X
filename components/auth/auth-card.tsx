@@ -25,7 +25,7 @@ export function AuthCard({
 }: AuthCardProps) {
   return (
     <BackgroundGradientAnimation containerClassName="min-h-screen">
-      <div className="absolute z-10 inset-0 flex items-center justify-center p-4 pointer-events-none">
+      <div className="absolute z-10 inset-0 flex items-center justify-center p-4 ">
         <Card className="w-full max-w-md backdrop-blur-lg bg-card/70">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-2">

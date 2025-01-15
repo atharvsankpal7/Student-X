@@ -51,6 +51,7 @@ export function WorldIDButton() {
       action="login"
       onSuccess={handleVerify}
       handleVerify={handleVerify}
+      
     >
       {({ open }) => (
         <Button
