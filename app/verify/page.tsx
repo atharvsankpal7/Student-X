@@ -1,19 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle, XCircle, X } from "lucide-react";
+import { FileUpload } from "@/components/ui/file-upload";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, FileText, CheckCircle, XCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
+import { BackgroundLines } from "@/components/ui/background-lines";
 
 interface Certificate {
   certificateId: string;
@@ -24,147 +17,188 @@ interface Certificate {
   isValid: boolean;
 }
 
-export default function VerifyPage() {
-  const [certificateId, setCertificateId] = useState("");
-  const [username, setUsername] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const { toast } = useToast();
+const modalVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.8,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut",
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    transition: {
+      duration: 0.2,
+      ease: "easeIn",
+    },
+  },
+};
 
-  const verifyByCertificateId = async () => {
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.2 },
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.2 },
+  },
+};
+
+const iconVariants = {
+  hidden: { scale: 0, rotate: -180 },
+  visible: {
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 15,
+      delay: 0.2,
+    },
+  },
+};
+
+export default function VerifyPage() {
+  const [loading, setLoading] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<boolean | null>(
+    null
+  );
+  const [showModal, setShowModal] = useState(false);
+
+  const handleFileUpload = async (files: File[]) => {
+    if (files.length === 0) return;
+
+    const file = files[0];
+    if (file.type !== "application/pdf") {
+      setVerificationResult(false);
+      setShowModal(true);
+      return;
+    }
+
     try {
       setLoading(true);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
       const response = await fetch("/api/certificates/verify", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ certificateId }),
+        body: formData,
       });
 
       if (!response.ok) throw new Error("Verification failed");
 
       const data = await response.json();
-      setCertificates([data.certificate]);
+      setVerificationResult(data.isValid);
+      setShowModal(true);
     } catch (error) {
-      toast({
-        title: "Verification Failed",
-        description: "Could not verify the certificate",
-        variant: "destructive",
-      });
+      setVerificationResult(false);
+      setShowModal(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const searchByUsername = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `/api/certificates/search?username=${username}`
-      );
-
-      if (!response.ok) throw new Error("Search failed");
-
-      const data = await response.json();
-      setCertificates(data.certificates);
-    } catch (error) {
-      toast({
-        title: "Search Failed",
-        description: "Could not find certificates for this username",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const closeModal = () => {
+    setShowModal(false);
+    setTimeout(() => {
+      setVerificationResult(null);
+    }, 200);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary flex items-center justify-center p-4">
-      <BackgroundBeamsWithCollision>
-        <Card className="w-full max-w-2xl backdrop-blur-lg bg-card/50">
-          <CardHeader>
-            <CardTitle>Verify Certificate</CardTitle>
-            <CardDescription>
-              Verify certificates using certificate ID or candidate username
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="id" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="id">Certificate ID</TabsTrigger>
-                <TabsTrigger value="username">Username</TabsTrigger>
-              </TabsList>
+    <BackgroundLines>
+      <div className="flex items-center justify-center min-h-screen p-6">
+        <div className="w-full max-w-4xl border rounded-lg shadow-lg p-8 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+          <FileUpload onChange={handleFileUpload} />
 
-              <TabsContent value="id" className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter Certificate ID"
-                    value={certificateId}
-                    onChange={(e) => setCertificateId(e.target.value)}
-                  />
-                  <Button onClick={verifyByCertificateId} disabled={loading}>
-                    <Search className="w-4 h-4 mr-2" />
-                    Verify
-                  </Button>
-                </div>
-              </TabsContent>
+          {loading && (
+            <div className="flex items-center justify-center mt-6">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+            </div>
+          )}
 
-              <TabsContent value="username" className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter Candidate Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                  <Button onClick={searchByUsername} disabled={loading}>
-                    <Search className="w-4 h-4 mr-2" />
-                    Search
-                  </Button>
-                </div>
-              </TabsContent>
+          <AnimatePresence>
+            {showModal && verificationResult !== null && (
+              <>
+                <motion.div
+                  variants={overlayVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                  onClick={closeModal}
+                />
 
-              {certificates.length > 0 && (
-                <div className="mt-6 space-y-4">
-                  {certificates.map((cert) => (
-                    <Card key={cert.certificateId}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-full bg-primary/10">
-                              <FileText className="w-6 h-6 text-primary" />
-                            </div>
-                            <div>
-                              <h3 className="font-medium">
-                                {cert.metadata.fileName}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                Issued:{" "}
-                                {new Date(cert.issueDate).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {cert.isValid ? (
-                              <div className="flex items-center text-green-500">
-                                <CheckCircle className="w-5 h-5 mr-1" />
-                                Valid
-                              </div>
-                            ) : (
-                              <div className="flex items-center text-red-500">
-                                <XCircle className="w-5 h-5 mr-1" />
-                                Invalid
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </Tabs>
-          </CardContent>
-        </Card>
-      </BackgroundBeamsWithCollision>
-    </div>
-  );
+                <motion.div
+                  variants={modalVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="fixed inset-0 flex items-center justify-center pointer-events-none z-50 p-4"
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-10 max-w-md w-full mx-4 pointer-events-auto border dark:border-gray-700">
+                    <div className="relative">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute -right-2 -top-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                        onClick={closeModal}
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
+
+                      <div className="text-center mb-8">
+                        <motion.div
+                          variants={iconVariants}
+                          initial="hidden"
+                          animate="visible"
+                          className="inline-block"
+                        >
+                          {verificationResult ? (
+                            <CheckCircle className="h-20 w-20 text-green-500 mx-auto" />
+                          ) : (
+                            <XCircle className="h-20 w-20 text-red-500 mx-auto" />
+                          )}
+                        </motion.div>
+
+                        <h3 className="text-3xl font-bold mt-6 mb-3">
+                          {verificationResult
+                            ? "Certificate Verified"
+                            : "Verification Failed"}
+                        </h3>
+
+                        <p className="text-gray-600 dark:text-gray-300 text-lg">
+                          {verificationResult
+                            ? "The certificate is authentic and valid."
+                            : "We couldn't verify this certificate. Please try again with a valid certificate."}
+                        </p>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={closeModal}
+                          variant={verificationResult ? "default" : "destructive"}
+                          className="min-w-40 text-lg py-6"
+                        >
+                          {verificationResult ? "Great!" : "Try Again"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </BackgroundLines>  );
 }
