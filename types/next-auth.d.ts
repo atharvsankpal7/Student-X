@@ -4,6 +4,7 @@ declare module "next-auth" {
   interface User {
     worldId: string;
     role: string;
+    verificationLevel?: string;
   }
 
   interface Session {
@@ -11,6 +12,14 @@ declare module "next-auth" {
       id: string;
       worldId: string;
       role: string;
+      verificationLevel?: string;
     };
+  }
+
+  // Add JWT type to include custom fields
+  interface JWT {
+    worldId?: string;
+    role?: string;
+    verificationLevel?: string;
   }
 }

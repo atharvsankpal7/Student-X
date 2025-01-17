@@ -1,30 +1,32 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import dbConnect from '@/lib/db';
-import CertificateRequest from '@/lib/models/certificate-request';
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import dbConnect from "@/lib/db";
+import CertificateRequest from "@/lib/models/certificate-request";
+import User from "@/lib/models/user";
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'organization') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!session || session.user.role !== "organization") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { candidateId, certificateId } = await req.json();
+    console.log("Session:", session);
+    const { candidateUsername, certificateId } = await req.json();
     await dbConnect();
+    const candidateId = await User.findOne({ username: candidateUsername });
 
     // Check if there's already a pending request
     const existingRequest = await CertificateRequest.findOne({
       organizationId: session.user.id,
       candidateId,
       certificateId,
-      status: 'pending',
+      status: "pending",
     });
 
     if (existingRequest) {
       return NextResponse.json(
-        { error: 'A pending request already exists' },
+        { error: "A pending request already exists" },
         { status: 400 }
       );
     }
@@ -33,14 +35,14 @@ export async function POST(req: Request) {
       organizationId: session.user.id,
       candidateId,
       certificateId,
-      status: 'pending',
+      status: "pending",
     });
 
     return NextResponse.json(request);
   } catch (error) {
-    console.error('Request creation error:', error);
+    console.error("Request creation error:", error);
     return NextResponse.json(
-      { error: 'Failed to create request' },
+      { error: "Failed to create request" },
       { status: 500 }
     );
   }
@@ -50,23 +52,23 @@ export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     await dbConnect();
-    const query = session.user.role === 'candidate'
-      ? { candidateId: session.user.id }
-      : { organizationId: session.user.id };
-
+    const query =
+      session.user.role === "candidate"
+        ? { candidateId: session.user.id }
+        : { organizationId: session.user.id };
+    console.log("Query:", query);
     const requests = await CertificateRequest.find(query)
-      .populate('certificateId')
+      .populate("certificateId")
       .sort({ createdAt: -1 });
 
     return NextResponse.json(requests);
   } catch (error) {
-    console.error('Request retrieval error:', error);
+    console.error("Request retrieval error:", error);
     return NextResponse.json(
-      { error: 'Failed to retrieve requests' },
+      { error: "Failed to retrieve requests" },
       { status: 500 }
     );
   }

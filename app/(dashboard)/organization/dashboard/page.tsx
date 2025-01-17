@@ -63,7 +63,7 @@ export default function OrganizationDashboard() {
       const response = await fetch('/api/certificates/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ certificateId, candidateId: username }),
+        body: JSON.stringify({ certificateId, candidateUsername: username }),
       });
 
       if (!response.ok) throw new Error('Request failed');

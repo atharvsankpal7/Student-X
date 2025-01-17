@@ -70,8 +70,10 @@ export default function CandidateDashboard() {
 
   const fetchRequests = async () => {
     try {
+      console.log("Fetching certificate requests...");
       const response = await fetch("/api/certificates/requests");
       const data = await response.json();
+      console.log("Response:", data);
       setRequests(data);
     } catch (error) {
       console.error("Error fetching requests:", error);
@@ -90,7 +92,9 @@ export default function CandidateDashboard() {
 
       toast({
         title: "Success",
-        description: `Request ${approve ? "approved" : "rejected"} successfully`,
+        description: `Request ${
+          approve ? "approved" : "rejected"
+        } successfully`,
       });
 
       fetchRequests();
